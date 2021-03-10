@@ -11,19 +11,21 @@ import java.util.Optional;
 
 public class TeamLeadDao {
 
+    
 //    CREATE
-    public static void addToTable(TeamLead teamLead) {
+    public void addToTable(TeamLead teamLead) {
+
+        String sqlQuery = "INSERT INTO team_lead (name, surname, team_lead_age) VALUES (?,?,?)";
+
         try (Connection connection = PostgresqlConnector.getConnection()) {
 
-            PreparedStatement statement = connection.prepareStatement("INSERT INTO " +
-                            "team_lead (name, surname, team_lead_age) VALUES (?,?,?)");
+            PreparedStatement statement = connection.prepareStatement(sqlQuery);
 
             statement.setString(1, teamLead.getName());
             statement.setString(2, teamLead.getSurname());
             statement.setInt(3, teamLead.getTeamLeadAge());
 
-            int i = statement.executeUpdate();
-            System.out.println(i);
+            System.out.println(statement.executeUpdate());
 
         } catch (SQLException e) {
             e.printStackTrace();
@@ -32,16 +34,17 @@ public class TeamLeadDao {
 
 
 //    READ ALL
-    public static List<TeamLead> findAll() {
+    public List<TeamLead> findAll() {
 
-        List<TeamLead> teamLeads = new ArrayList();
+        String sqlQuery = "SELECT  * FROM team_lead";
+
+        List<TeamLead> teamLeads = new ArrayList<>();
 
         try (Connection connection = PostgresqlConnector.getConnection()) {
 
-            Statement statement =
-                    connection.createStatement();
+            Statement statement = connection.createStatement();
 
-            ResultSet rs = statement.executeQuery("SELECT  * FROM team_lead");
+            ResultSet rs = statement.executeQuery(sqlQuery);
 
             while (rs.next()) {
                 TeamLead teamLead = new TeamLead(rs.getInt("id"),
@@ -60,16 +63,18 @@ public class TeamLeadDao {
 
 
 //    READ BY ID
-    public static Optional<TeamLead> findById(int id) {
+    public Optional<TeamLead> findById(int id) {
+
+        String sqlQuery = "SELECT * FROM team_lead WHERE id = ?";
 
         try (Connection connection = PostgresqlConnector.getConnection()) {
 
-            PreparedStatement statement = connection.prepareStatement("SELECT  * FROM team_lead WHERE id = ?");
+            PreparedStatement statement = connection.prepareStatement(sqlQuery);
             statement.setInt(1, id);
 
             ResultSet rs = statement.executeQuery();
 
-            while (rs.next()) {
+            if (rs.next()) {
                 TeamLead tl = new TeamLead(rs.getInt("id"),
                         rs.getString("name"),
                         rs.getString("surname"),
@@ -86,21 +91,20 @@ public class TeamLeadDao {
 
 
 //    UPDATE
-    public TeamLead updateTL(int idWHERE, TeamLead teamLead) {
+    public TeamLead update(int idWHERE, TeamLead teamLead) {
 
-        String sqlUpdate = "UPDATE team_lead SET name = ?, surname = ?, team_lead_age = ? WHERE id = ?";
+        String sqlQuery = "UPDATE team_lead SET name = ?, surname = ?, team_lead_age = ? WHERE id = ?";
 
         try(Connection connection = PostgresqlConnector.getConnection()) {
 
-            PreparedStatement statement = connection.prepareStatement(sqlUpdate);
+            PreparedStatement statement = connection.prepareStatement(sqlQuery);
 
             statement.setString(1, teamLead.getName());
             statement.setString(2, teamLead.getSurname());
             statement.setInt(3, teamLead.getTeamLeadAge());
             statement.setInt(4, idWHERE);
 
-            int i = statement.executeUpdate();
-            System.out.println(i);
+            System.out.println(statement.executeUpdate());
 
         } catch (SQLException e) {
             e.printStackTrace();
@@ -108,6 +112,24 @@ public class TeamLeadDao {
         return findById(idWHERE).orElseThrow(() -> new RuntimeException());
     }
 
+
+//    DELETE
+    public int delete(int idWHERE) {
+
+        String sqlQuery = "DELETE FROM team_lead WHERE id = ?";
+
+        try(Connection connection = PostgresqlConnector.getConnection()) {
+
+            PreparedStatement statement = connection.prepareStatement(sqlQuery);
+            statement.setInt(1, idWHERE);
+
+            return statement.executeUpdate();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return -1;
+    }
 }
 //    Create DB "Course"
 //        - student (name, email, phone)

@@ -6,6 +6,7 @@ public class Main {
 
 //        TeamLeadDao.addToTable(new TeamLead("John", "Doe", 45));
 
-        TeamLeadDao.findById(2);
+        TeamLeadDao teamLeadDao = new TeamLeadDao();
+        teamLeadDao.findById(1);
     }
 }
